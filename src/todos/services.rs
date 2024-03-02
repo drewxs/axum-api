@@ -7,7 +7,7 @@ use axum::{
 use serde::Deserialize;
 use uuid::Uuid;
 
-use crate::{db::Db, models::Todo};
+use crate::{models::Todo, state::Cache};
 
 #[derive(Debug, Deserialize, Default)]
 pub struct Pagination {
@@ -17,7 +17,7 @@ pub struct Pagination {
 
 pub async fn get_todos(
     pagination: Option<Query<Pagination>>,
-    State(db): State<Db>,
+    State(db): State<Cache>,
 ) -> impl IntoResponse {
     let todos = db.read().unwrap();
 
@@ -38,14 +38,17 @@ pub struct CreateTodo {
     text: String,
 }
 
-pub async fn get_todo(Path(id): Path<Uuid>, State(db): State<Db>) -> impl IntoResponse {
+pub async fn get_todo(Path(id): Path<Uuid>, State(db): State<Cache>) -> impl IntoResponse {
     let todos = db.read().unwrap();
     let todo = todos.get(&id);
 
     (StatusCode::OK, Json(todo.cloned()))
 }
 
-pub async fn create_todo(State(db): State<Db>, Json(input): Json<CreateTodo>) -> impl IntoResponse {
+pub async fn create_todo(
+    State(db): State<Cache>,
+    Json(input): Json<CreateTodo>,
+) -> impl IntoResponse {
     let todo = Todo {
         id: Uuid::new_v4(),
         text: input.text,

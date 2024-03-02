@@ -5,4 +5,4 @@ use std::{
 };
 use uuid::Uuid;
 
-pub type Db = Arc<RwLock<HashMap<Uuid, Todo>>>;
+pub type Cache = Arc<RwLock<HashMap<Uuid, Todo>>>;
