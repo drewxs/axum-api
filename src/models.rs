@@ -1,9 +1,12 @@
-use serde::{Deserialize, Serialize};
+use std::time::SystemTime;
+
 use uuid::Uuid;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Todo {
+#[derive(Clone, Debug)]
+pub struct Post {
     pub id: Uuid,
-    pub text: String,
-    pub completed: bool,
+    pub title: String,
+    pub body: String,
+    pub created_at: SystemTime,
+    pub updated_at: SystemTime,
 }

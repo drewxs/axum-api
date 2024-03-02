@@ -1,23 +1,25 @@
-mod models;
-mod state;
-mod todos;
-
 use std::env;
 
-use crate::{
-    state::Cache,
-    todos::{create_todo, get_todo, get_todos},
-};
+use anyhow::Result;
 use axum::{routing::get, Router};
 use dotenvy::dotenv;
+use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
 
+use axum_api::posts::{create_todo, get_todo, get_todos};
+
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<()> {
     dotenv().ok();
     tracing_subscriber::fmt::init();
 
-    let cache = Cache::default();
+    let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let db = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&db_url)
+        .await?;
+
+    sqlx::migrate!().run(&db).await?;
 
     let todo_routes = Router::new()
         .route("/", get(get_todos).post(create_todo))
@@ -28,13 +30,15 @@ async fn main() {
     let app = Router::new()
         .route("/healthcheck", get(|| async { "OK" }))
         .nest("/api/v1", v1_routes)
-        .with_state(cache);
+        .with_state(db);
 
-    let host = env::var("HOST").expect("HOST must be set in .env");
-    let port = env::var("PORT").expect("PORT must be set in .env");
+    let host = env::var("HOST").expect("HOST must be set");
+    let port = env::var("PORT").expect("PORT must be set");
     let addr = format!("{}:{}", host, port);
 
-    tracing::debug!("listening on {}", addr);
+    println!("listening on {}", addr);
     let listener = TcpListener::bind(&addr).await.unwrap();
     axum::serve(listener, app).await.unwrap();
+
+    Ok(())
 }
