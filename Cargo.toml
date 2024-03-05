@@ -10,10 +10,14 @@ rand = { version = "0.8.5" }
 argon2 = { version = "0.5.3" }
 serde = { version = "1.0.197", features = ["derive"] }
 serde_json = { version = "1.0.114" }
-axum = { version = "0.7.4", features = ["tokio", "tracing"] }
+axum = { version = "0.7.4", features = ["tokio", "tracing", "macros"] }
 tokio = { version = "1.34.0", features = ["full"] }
 tower = { version = "0.4.13", features = ["util", "timeout"] }
-tower-http = { version = "0.5.2", features = ["add-extension", "trace"] }
+tower-http = { version = "0.5.2", features = [
+  "add-extension",
+  "trace",
+  "cors",
+] }
 tracing = { version = "0.1.40" }
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 uuid = { version = "1.7.0", features = ["serde", "v4"] }
@@ -22,9 +26,10 @@ sqlx = { version = "0.7.3", features = [
   "tls-native-tls",
   "postgres",
   "uuid",
-  "time",
+  "chrono",
   "json",
   "migrate",
   "macros",
 ] }
-validator = { version = "0.16.1", features = ["derive"] }
+validator = { version = "0.17.0", features = ["derive"] }
+chrono = { version = "0.4.34", features = ["serde"] }
