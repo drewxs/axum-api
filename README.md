@@ -30,5 +30,10 @@ cargo run
 
 # Start the server with watch
 cargo watch -q -c -w src/ -x run
-```
 
+# Enter db shell
+docker exec -it postgres bash
+
+# Enter db psql shell
+docker exec -it postgres psql -U postgres -d dev_db
+```
