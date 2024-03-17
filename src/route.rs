@@ -3,6 +3,7 @@ use std::sync::Arc;
 use axum::routing::{get, post};
 use axum::Router;
 
+use crate::user::login;
 use crate::{
     post::{create_post, delete_post, edit_post, get_post, get_posts},
     state::AppState,
@@ -19,5 +20,6 @@ pub fn create_router(state: Arc<AppState>) -> Router {
         )
         .route("/api/v1/user", post(create_user))
         .route("/api/v1/user/:id", get(get_user))
+        .route("/api/v1/user/login", post(login))
         .with_state(state)
 }

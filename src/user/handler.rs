@@ -76,3 +76,41 @@ pub async fn get_user(
         )),
     }
 }
+
+#[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct LoginDto {
+    pub email: String,
+    pub password: String,
+}
+
+pub async fn login(
+    State(state): State<Arc<AppState>>,
+    Json(body): Json<LoginDto>,
+) -> impl IntoResponse {
+    if let Err(e) = body.validate() {
+        return Err((StatusCode::BAD_REQUEST, e.to_string()));
+    }
+
+    let email = body.email.to_string();
+
+    let res = sqlx::query_as!(User, "SELECT * FROM users WHERE email = $1", email)
+        .fetch_one(&state.db)
+        .await;
+
+    match res {
+        Ok(user) => {
+            let password = body.password.to_string();
+            let hash = user.password;
+
+            match crypto::verify(password, hash).await {
+                Ok(true) => Ok((StatusCode::OK, Json(json!({ "status": "success" })))),
+                Ok(false) => Err((StatusCode::UNAUTHORIZED, "Invalid password".to_string())),
+                Err(e) => Err((StatusCode::INTERNAL_SERVER_ERROR, e.to_string())),
+            }
+        }
+        Err(_) => Err((
+            StatusCode::NOT_FOUND,
+            "User with email does not exist".to_string(),
+        )),
+    }
+}
