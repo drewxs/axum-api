@@ -13,11 +13,8 @@ Starter project for an API server using Axum and Postgres.
 # Start Docker
 docker compose up -d
 
-# Install sqlx-cli
-cargo install sqlx-cli
-
-# Install cargo watch
-cargo install cargo-watch
+# Install sqlx and cargo watch CLIs
+cargo install sqlx-cli cargo-watch
 
 # Add migration
 sqlx migrate add -r <name>
@@ -29,7 +26,7 @@ sqlx migrate run
 cargo run
 
 # Start the server with watch
-cargo watch -q -c -w src/ -x run
+cargo watch -qcw src -x run
 
 # Enter db shell
 docker exec -it postgres bash
